@@ -17,6 +17,10 @@ use Symfony\Component\Security\Core\User\UserInterface;
 #[ORM\HasLifecycleCallbacks]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
+    const ROLE_ROOT = 'ROLE_ROOT';
+    const ROLE_USER = 'ROLE_USER';
+    const ROLES_LIST = [self::ROLE_ROOT, self::ROLE_USER];
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER)]
