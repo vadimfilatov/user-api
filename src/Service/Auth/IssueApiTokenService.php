@@ -15,7 +15,7 @@ final class IssueApiTokenService
     ) {
     }
 
-    public function issue(User $user): array
+    public function issue(User $user): ApiToken
     {
         $plainToken = bin2hex(random_bytes(32));
         $expiresAt = new \DateTimeImmutable('+7 day');
@@ -28,9 +28,6 @@ final class IssueApiTokenService
         $this->entityManager->persist($apiToken);
         $this->entityManager->flush();
 
-        return [
-            'token' => $plainToken,
-            'expiresAt' => $expiresAt,
-        ];
+        return $apiToken;
     }
 }

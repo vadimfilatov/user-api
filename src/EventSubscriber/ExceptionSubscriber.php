@@ -12,6 +12,7 @@ use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Validator\ConstraintViolationInterface;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
 
@@ -61,6 +62,18 @@ final class ExceptionSubscriber implements EventSubscriberInterface
                     'message' => $throwable->getMessage(),
                 ],
             ], Response::HTTP_BAD_REQUEST));
+
+            return;
+        }
+
+        if ($throwable instanceof AccessDeniedException) {
+            $event->setResponse(new JsonResponse([
+                'success' => false,
+                'error' => [
+                    'code' => 'access_denied',
+                    'message' => $throwable->getMessage() !== '' ? $throwable->getMessage() : 'Access denied.',
+                ],
+            ], Response::HTTP_FORBIDDEN));
 
             return;
         }

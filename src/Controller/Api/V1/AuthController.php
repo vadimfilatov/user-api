@@ -23,7 +23,7 @@ final class AuthController extends AbstractController
     ): JsonResponse
     {
         try {
-            $result = $loginService->login($dto->login, $dto->pass);
+            $apiToken = $loginService->login($dto->login, $dto->pass);
         } catch (InvalidCredentialsException $exception) {
             return $this->json([
                 'success' => false,
@@ -37,9 +37,9 @@ final class AuthController extends AbstractController
         return $this->json([
             'success' => true,
             'data' => [
-                'token' => $result['token'],
+                'token' => $apiToken->getTokenHash(),
                 'token_type' => 'Bearer',
-                'expires_at' => $result['expiresAt']->format(DATE_ATOM),
+                'expires_at' => $apiToken->getExpiresAt()->format(DATE_ATOM),
             ],
         ]);
     }
