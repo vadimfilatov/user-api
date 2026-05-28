@@ -5,12 +5,10 @@ declare(strict_types=1);
 namespace App\Controller\Api\V1;
 
 use App\Dto\Auth\LoginRequestDto;
-use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
-use App\Exception\InvalidCredentialsException;
 use App\Service\Auth\LoginService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/v1/api/auth')]
@@ -22,17 +20,7 @@ final class AuthController extends AbstractController
         LoginService $loginService,
     ): JsonResponse
     {
-        try {
-            $apiToken = $loginService->login($dto->login, $dto->pass);
-        } catch (InvalidCredentialsException $exception) {
-            return $this->json([
-                'success' => false,
-                'error' => [
-                    'code' => 'invalid_credentials',
-                    'message' => $exception->getMessage(),
-                ],
-            ], Response::HTTP_UNAUTHORIZED);
-        }
+        $apiToken = $loginService->login($dto->login, $dto->pass);
 
         return $this->json([
             'success' => true,

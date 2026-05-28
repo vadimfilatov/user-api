@@ -11,8 +11,8 @@ use App\Security\Voter\UserVoter;
 use App\Service\User\CreateUserService;
 use App\Service\User\DeleteUserService;
 use App\Service\User\GetUserService;
+use App\Service\User\UserResponseMapper;
 use App\Service\User\UpdateUserService;
-use App\Service\User\UserPasswordHasher;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,19 +23,14 @@ use Symfony\Component\Routing\Attribute\Route;
 final class UserController extends AbstractController
 {
     #[Route('/{id}', name: 'api_v1_users_get', requirements: ['id' => '\\d+'], methods: ['GET'])]
-    public function get(int $id, GetUserService $getUserService, UserPasswordHasher $userPasswordHasher): JsonResponse
+    public function get(int $id, GetUserService $getUserService, UserResponseMapper $userResponseMapper): JsonResponse
     {
         $user = $getUserService->getById($id);
         $this->denyAccessUnlessGranted(UserVoter::VIEW, $user);
 
         return $this->json([
             'success' => true,
-            'data' => [
-                'id' => $user->getId(),
-                'login' => $user->getLogin(),
-                'phone' => $user->getPhone(),
-                'pass' => $userPasswordHasher->decrypt($user->getPass()),
-            ],
+            'data' => $userResponseMapper->map($user),
         ]);
     }
 
@@ -43,7 +38,7 @@ final class UserController extends AbstractController
     public function create(
         #[MapRequestPayload(acceptFormat: 'json')] CreateUserRequestDto $dto,
         CreateUserService $createUserService,
-        UserPasswordHasher $userPasswordHasher,
+        UserResponseMapper $userResponseMapper,
     ): JsonResponse {
         $this->denyAccessUnlessGranted(UserVoter::CREATE);
 
@@ -51,12 +46,7 @@ final class UserController extends AbstractController
 
         return $this->json([
             'success' => true,
-            'data' => [
-                'id' => $user->getId(),
-                'login' => $user->getLogin(),
-                'phone' => $user->getPhone(),
-                'pass' => $userPasswordHasher->decrypt($user->getPass()),
-            ],
+            'data' => $userResponseMapper->map($user),
         ], Response::HTTP_CREATED);
     }
 
@@ -66,7 +56,7 @@ final class UserController extends AbstractController
         #[MapRequestPayload(acceptFormat: 'json')] UpdateUserRequestDto $dto,
         GetUserService $getUserService,
         UpdateUserService $updateUserService,
-        UserPasswordHasher $userPasswordHasher,
+        UserResponseMapper $userResponseMapper,
     ): JsonResponse {
         $user = $getUserService->getById($id);
         $this->denyAccessUnlessGranted(UserVoter::EDIT, $user);
@@ -75,12 +65,7 @@ final class UserController extends AbstractController
 
         return $this->json([
             'success' => true,
-            'data' => [
-                'id' => $updatedUser->getId(),
-                'login' => $updatedUser->getLogin(),
-                'phone' => $updatedUser->getPhone(),
-                'pass' => $userPasswordHasher->decrypt($user->getPass()),
-            ],
+            'data' => $userResponseMapper->map($updatedUser),
         ]);
     }
 

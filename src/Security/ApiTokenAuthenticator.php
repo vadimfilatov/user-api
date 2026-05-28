@@ -42,18 +42,16 @@ final class ApiTokenAuthenticator extends AbstractAuthenticator implements Authe
             throw new CustomUserMessageAuthenticationException('Missing bearer token');
         }
 
-        $plainToken = trim(substr($authorizationHeader, 7));
+        $token = trim(substr($authorizationHeader, 7));
 
-        if ($plainToken === '') {
+        if ($token === '') {
             throw new CustomUserMessageAuthenticationException('Missing bearer token');
         }
 
-        $tokenHash = hash('sha256', $plainToken);
-
         return new SelfValidatingPassport(
-            new UserBadge($tokenHash, function (string $tokenHash): UserInterface {
+            new UserBadge($token, function (string $token): UserInterface {
                 /** @var ApiToken|null $apiToken */
-                $apiToken = $this->apiTokenRepository->findOneBy(['tokenHash' => $tokenHash]);
+                $apiToken = $this->apiTokenRepository->findOneBy(['tokenHash' => $token]);
 
                 if ($apiToken === null) {
                     throw new CustomUserMessageAuthenticationException('Invalid bearer token');
